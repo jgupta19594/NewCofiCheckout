@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofi Checkout</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: #f8fafc;
+        }
+
+        h1, h3, h4 {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .card {
+            background-color: #1e293b;
+            border: none;
+            border-radius: 10px;
+            color: #e2e8f0;
+        }
+
+        .card-header {
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Product Price Display */
+        .product-price {
+            color: #22c55e;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .list-group-item {
+            background-color: #0f172a;
+            color: #f8fafc;
+            border: 1px solid #334155;
+        }
+
+        .form-check-label {
+            font-weight: 500;
+            color: #f8fafc;
+        }
+
+        .form-check-input:disabled + .form-check-label {
+            color: #9ca3af;
+        }
+
+        /* Buttons */
+        .btn-warning {
+            background-color: #fbbf24;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background-color: #f59e0b;
+        }
+
+        .btn-success {
+            background-color: #22c55e;
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #16a34a;
+        }
+
+        /* Total Price */
+        .total-box {
+            background: linear-gradient(to right, #16a34a, #22c55e);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .total-box h3 {
+            font-weight: 700;
+        }
+
+        /* Inputs */
+        .form-control {
+            background-color: #0f172a;
+            color: #f8fafc;
+            border: 1px solid #334155;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+
+    <h1 class="text-center mb-5">Cofi Checkout</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Step 1: Price List (ALWAYS AT TOP) -->
+            <div class="card shadow-lg mb-4">
+                <div class="card-header text-center">
+                    <h3>Product Price List</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            1 Voucher Price
+                            <span class="product-price">€5.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            1 T-Shirt Price
+                            <span class="product-price">€20.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            1 Mug Price
+                            <span class="product-price">€7.50</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 2: User Selects Quantity -->
+            <div class="card shadow-lg mb-4">
+                <div class="card-header text-center">
+                    <h3>Select Quantity</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- This is where the Django form will appear -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">Choose number of each product</h5>
+                            {{ cart_form.as_p }}
+                        </div>
+
+                        <!-- Step 3: Check Discounts Button -->
+                        <button type="submit" name="check_discounts" class="btn btn-warning w-100 mb-3">
+                            Check Available Discounts
+                        </button>
+
+                        <!-- Step 4: Show Discounts (only after checking) -->
+                        {% if show_discounts %}
+                        <div class="mt-4">
+                            <h4 class="mb-3">Available Discounts</h4>
+                            {% if available_discounts %}
+
+                                <!-- SWAG PACK -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="swag" id="swag"
+                                           onchange="toggleDescription('swagDesc')"
+                                           {% if available_discounts.SWAG_PACK|default:0 == 0 %}disabled{% endif %}>
+                                    <label class="form-check-label" for="swag">
+                                        SWAG PACK
+                                        <span class="badge bg-info">
+                                            Max: {{ available_discounts.SWAG_PACK|default:0 }}
+                                        </span>
+                                    </label>
+                                    <!-- Description (hidden by default) -->
+                                    <div id="swagDesc" class="mt-2 p-2 rounded bg-dark text-light border border-info d-none">
+                                        <strong>SWAG Discount:</strong><br>
+                                        A SWAG is a pack consisting of 1 T-Shirt + 1 Voucher + 1 Mug at a fixed price of 25€.
+                                    </div>
+                                </div>
+
+                                <!-- 2-FOR-1 VOUCHER -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="two_for_one_voucher" id="two_for_one_voucher"
+                                           onchange="toggleDescription('voucherDesc')"
+                                           {% if available_discounts.TWO_FOR_ONE_VOUCHER|default:0 == 0 %}disabled{% endif %}>
+                                    <label class="form-check-label" for="two_for_one_voucher">
+                                        2-FOR-1 VOUCHER
+                                        <span class="badge bg-info">
+                                            Max: {{ available_discounts.TWO_FOR_ONE_VOUCHER|default:0 }}
+                                        </span>
+                                    </label>
+                                    <!-- Description (hidden by default) -->
+                                    <div id="voucherDesc" class="mt-2 p-2 rounded bg-dark text-light border border-info d-none">
+                                        <strong>2-for-1 Voucher Discount:</strong><br>
+                                        Buy two of the same voucher, and get the second one free.
+                                    </div>
+                                </div>
+
+                                <!-- BULK TSHIRT -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="bulk_tshirt" id="bulk_tshirt"
+                                           onchange="toggleDescription('bulkDesc')"
+                                           {% if available_discounts.BULK_TSHIRT|default:0 == 0 %}disabled{% endif %}>
+                                    <label class="form-check-label" for="bulk_tshirt">
+                                        BULK TSHIRT (Min 3)
+                                        <span class="badge bg-info">
+                                            Max: {{ available_discounts.BULK_TSHIRT|default:0 }}
+                                        </span>
+                                    </label>
+                                    <!-- Description (hidden by default) -->
+                                    <div id="bulkDesc" class="mt-2 p-2 rounded bg-dark text-light border border-info d-none">
+                                        <strong>Bulk T-Shirt Discount:</strong><br>
+                                        If you buy 3 or more T-Shirts, the price per unit drops to 19.00€.
+                                    </div>
+                                </div>
+
+                                <!-- Apply Discounts Button -->
+                                <button type="submit" name="apply_discounts" class="btn btn-success w-100">
+                                    Apply Discounts
+                                </button>
+
+                            {% else %}
+                                <p class="text-muted">No discounts available.</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Step 5: Show Total Price -->
+            {% if total_price is not None %}
+            <div class="total-box text-center p-4 shadow-lg">
+                <h3>Total Price</h3>
+                <p class="display-5">{{ total_price }}€</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+<script>
+    function toggleDescription(descId) {
+        const descBox = document.getElementById(descId);
+        descBox.classList.toggle('d-none');
+    }
+</script>
+
+</body>
+</html>

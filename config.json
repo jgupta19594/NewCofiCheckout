@@ -1,0 +1,30 @@
+{
+  "products": {
+    "VOUCHER": {
+      "name": "Cofi Voucher",
+      "price": 5.00
+    },
+    "TSHIRT": {
+      "name": "Cofi T-Shirt",
+      "price": 20.00
+    },
+    "MUG": {
+      "name": "Cofi Coffee Mug",
+      "price": 7.50
+    }
+  },
+  "discounts": {
+    "SWAG_PACK": {
+      "items": ["VOUCHER", "TSHIRT", "MUG"],
+      "price": 25.00
+    },
+    "TWO_FOR_ONE_VOUCHER": {
+      "items": ["VOUCHER"]
+    },
+    "BULK_TSHIRT": {
+      "items": ["TSHIRT"],
+      "min_quantity": 3,
+      "new_price": 19.00
+    }
+  }
+}
